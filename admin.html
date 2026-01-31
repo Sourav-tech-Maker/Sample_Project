@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Admin Panel - Echoes Within Bookings</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            min-height: 100vh;
+            color: #fff;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        header h1 {
+            color: #d4af37;
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        header p {
+            color: #888;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .stat-card i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .stat-card.pending i {
+            color: #f39c12;
+        }
+
+        .stat-card.verified i {
+            color: #2ecc71;
+        }
+
+        .stat-card.rejected i {
+            color: #e74c3c;
+        }
+
+        .stat-card.blocked i {
+            color: #9b59b6;
+        }
+
+        .stat-card h3 {
+            font-size: 2rem;
+            margin-bottom: 5px;
+        }
+
+        .stat-card p {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        .section-title {
+            font-size: 1.3rem;
+            color: #d4af37;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .bookings-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 30px;
+        }
+
+        .bookings-table th,
+        .bookings-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .bookings-table th {
+            background: rgba(212, 175, 55, 0.1);
+            color: #d4af37;
+            font-weight: 600;
+        }
+
+        .bookings-table tr:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background: rgba(243, 156, 18, 0.2);
+            color: #f39c12;
+        }
+
+        .status-verified {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+        }
+
+        .status-rejected {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            transition: all 0.3s ease;
+            margin-right: 5px;
+        }
+
+        .btn-verify {
+            background: #2ecc71;
+            color: #fff;
+        }
+
+        .btn-verify:hover {
+            background: #27ae60;
+            transform: translateY(-2px);
+        }
+
+        .btn-reject {
+            background: #e74c3c;
+            color: #fff;
+        }
+
+        .btn-reject:hover {
+            background: #c0392b;
+            transform: translateY(-2px);
+        }
+
+        .blocked-users {
+            background: rgba(155, 89, 182, 0.1);
+            border: 1px solid rgba(155, 89, 182, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .blocked-user-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 8px;
+            margin-bottom: 10px;
+        }
+
+        .blocked-user-info h4 {
+            color: #e74c3c;
+            margin-bottom: 5px;
+        }
+
+        .blocked-user-info p {
+            font-size: 0.85rem;
+            color: #888;
+        }
+
+        .btn-unblock {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-unblock:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .no-data {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .no-data i {
+            font-size: 3rem;
+            margin-bottom: 15px;
+            opacity: 0.5;
+        }
+
+        .refresh-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #d4af37, #f4d03f);
+            border: none;
+            color: #1a1a2e;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(212, 175, 55, 0.4);
+            transition: all 0.3s ease;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.1);
+        }
+
+        @media (max-width: 768px) {
+            .bookings-table {
+                font-size: 0.85rem;
+            }
+
+            .bookings-table th,
+            .bookings-table td {
+                padding: 10px 8px;
+            }
+
+            .action-btn {
+                padding: 6px 10px;
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-shield-alt"></i> Admin Verification Panel</h1>
+            <p>Manage bookings and verify payments</p>
+        </header>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card pending">
+                <i class="fas fa-clock"></i>
+                <h3 id="pendingCount">0</h3>
+                <p>Pending Verification</p>
+            </div>
+            <div class="stat-card verified">
+                <i class="fas fa-check-circle"></i>
+                <h3 id="verifiedCount">0</h3>
+                <p>Verified Bookings</p>
+            </div>
+            <div class="stat-card rejected">
+                <i class="fas fa-times-circle"></i>
+                <h3 id="rejectedCount">0</h3>
+                <p>Rejected</p>
+            </div>
+            <div class="stat-card blocked">
+                <i class="fas fa-ban"></i>
+                <h3 id="blockedCount">0</h3>
+                <p>Blocked Users</p>
+            </div>
+        </div>
+
+        <!-- Pending Bookings -->
+        <h2 class="section-title"><i class="fas fa-hourglass-half"></i> Pending Verifications</h2>
+        <table class="bookings-table" id="pendingTable">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Name</th>
+                    <th>Phone</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Transaction ID</th>
+                    <th>Submitted</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="pendingBookings">
+                <!-- Dynamic content -->
+            </tbody>
+        </table>
+
+        <!-- Verified Bookings -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h2 class="section-title" style="margin-bottom: 0;"><i class="fas fa-check-circle"></i> Verified Bookings
+            </h2>
+            <button class="action-btn btn-reject" onclick="resetVerifiedList()" style="margin: 0;">
+                <i class="fas fa-trash-alt"></i> Reset List
+            </button>
+        </div>
+        <table class="bookings-table">
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Plan</th>
+                    <th>Amount</th>
+                    <th>Transaction ID</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody id="verifiedBookings">
+                <!-- Dynamic content -->
+            </tbody>
+        </table>
+
+        <!-- Blocked Users -->
+        <h2 class="section-title"><i class="fas fa-ban"></i> Blocked Users</h2>
+        <div class="blocked-users" id="blockedUsersList">
+            <!-- Dynamic content -->
+        </div>
+    </div>
+
+    <button class="refresh-btn" onclick="loadAllData()" title="Refresh Data">
+        <i class="fas fa-sync-alt"></i>
+    </button>
+
+    <script>
+        // Storage keys
+        const PENDING_KEY = 'ew_pending_bookings';
+        const FRAUD_KEY = 'ew_fraud_data';
+        const VERIFIED_KEY = 'ew_verified_bookings';
+
+        // Load all data
+        function loadAllData() {
+            loadPendingBookings();
+            loadVerifiedBookings();
+            loadBlockedUsers();
+            updateStats();
+        }
+
+        // Get pending bookings
+        function getPendingBookings() {
+            try {
+                return JSON.parse(localStorage.getItem(PENDING_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        // Get verified bookings
+        function getVerifiedBookings() {
+            try {
+                return JSON.parse(localStorage.getItem(VERIFIED_KEY)) || [];
+            } catch {
+                return [];
+            }
+        }
+
+        // Get fraud data
+        function getFraudData() {
+            try {
+                return JSON.parse(localStorage.getItem(FRAUD_KEY)) || {};
+            } catch {
+                return {};
+            }
+        }
+
+        // Save pending bookings
+        function savePendingBookings(bookings) {
+            localStorage.setItem(PENDING_KEY, JSON.stringify(bookings));
+        }
+
+        // Save verified bookings
+        function saveVerifiedBookings(bookings) {
+            localStorage.setItem(VERIFIED_KEY, JSON.stringify(bookings));
+        }
+
+        // Save fraud data
+        function saveFraudData(data) {
+            localStorage.setItem(FRAUD_KEY, JSON.stringify(data));
+        }
+
+        // Format date
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            return date.toLocaleString('en-IN', {
+                day: '2-digit',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+
+        // Load pending bookings table
+        function loadPendingBookings() {
+            const bookings = getPendingBookings().filter(b => b.verificationStatus === 'pending');
+            const tbody = document.getElementById('pendingBookings');
+
+            if (bookings.length === 0) {
+                tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="no-data">
+              <i class="fas fa-inbox"></i>
+              <p>No pending bookings</p>
+            </td>
+          </tr>
+        `;
+                return;
+            }
+
+            tbody.innerHTML = bookings.map(booking => `
+        <tr>
+          <td><strong>#${booking.bookingId}</strong></td>
+          <td>${booking.name}</td>
+          <td>${booking.phone}</td>
+          <td>${booking.plan}</td>
+          <td>₹${booking.totalAmount?.toLocaleString('en-IN') || booking.amount}/-</td>
+          <td><code>${booking.transactionId}</code></td>
+          <td>${formatDate(booking.submittedAt)}</td>
+          <td>
+            <button class="action-btn btn-verify" onclick="verifyBooking('${booking.bookingId}')">
+              <i class="fas fa-check"></i> Verify
+            </button>
+            <button class="action-btn btn-reject" onclick="rejectBooking('${booking.bookingId}')">
+              <i class="fas fa-times"></i> Reject
+            </button>
+          </td>
+        </tr>
+      `).join('');
+        }
+
+        // Load verified bookings
+        function loadVerifiedBookings() {
+            const bookings = getVerifiedBookings();
+            const pending = getPendingBookings().filter(b => b.verificationStatus !== 'pending');
+            const allVerified = [...bookings, ...pending.filter(b => b.verificationStatus === 'verified')];
+
+            const tbody = document.getElementById('verifiedBookings');
+
+            if (allVerified.length === 0) {
+                tbody.innerHTML = `
+          <tr>
+            <td colspan="8" class="no-data">
+              <i class="fas fa-inbox"></i>
+              <p>No verified bookings yet</p>
+            </td>
+          </tr>
+        `;
+                return;
+            }
+
+            tbody.innerHTML = allVerified.map(booking => `
+        <tr>
+          <td><strong>#${booking.bookingId}</strong></td>
+          <td>${booking.name}</td>
+          <td>${booking.email}</td>
+          <td>${booking.phone}</td>
+          <td>${booking.plan}</td>
+          <td>₹${booking.totalAmount?.toLocaleString('en-IN') || booking.amount}/-</td>
+          <td><code>${booking.transactionId}</code></td>
+          <td><span class="status-badge status-verified"><i class="fas fa-check"></i> Verified</span></td>
+        </tr>
+      `).join('');
+        }
+
+        // Load blocked users
+        function loadBlockedUsers() {
+            const fraudData = getFraudData();
+            const container = document.getElementById('blockedUsersList');
+
+            const blockedUsers = Object.entries(fraudData).filter(([_, data]) => data.blockedUntil);
+
+            if (blockedUsers.length === 0) {
+                container.innerHTML = `
+          <div class="no-data">
+            <i class="fas fa-user-check"></i>
+            <p>No blocked users</p>
+          </div>
+        `;
+                return;
+            }
+
+            container.innerHTML = blockedUsers.map(([identifier, data]) => {
+                const blockedUntil = new Date(data.blockedUntil);
+                const isExpired = new Date() > blockedUntil;
+
+                return `
+          <div class="blocked-user-item">
+            <div class="blocked-user-info">
+              <h4><i class="fas fa-user-slash"></i> ${identifier}</h4>
+              <p>False claims: ${data.falseClaimsCount} | Blocked until: ${blockedUntil.toLocaleString()}</p>
+              <p>${isExpired ? '⚠️ Block expired' : '🔒 Currently blocked'}</p>
+            </div>
+            <button class="btn-unblock" onclick="unblockUser('${identifier}')">
+              <i class="fas fa-unlock"></i> Unblock
+            </button>
+          </div>
+        `;
+            }).join('');
+        }
+
+        // Verify a booking
+        function verifyBooking(bookingId) {
+            if (!confirm('Are you sure you want to VERIFY this booking? This confirms the payment was received.')) return;
+
+            const pending = getPendingBookings();
+            const booking = pending.find(b => b.bookingId === bookingId);
+
+            if (booking) {
+                booking.verificationStatus = 'verified';
+                booking.verifiedAt = new Date().toISOString();
+
+                // Move to verified list
+                const verified = getVerifiedBookings();
+                verified.push(booking);
+                saveVerifiedBookings(verified);
+
+                // Remove from pending
+                const newPending = pending.filter(b => b.bookingId !== bookingId);
+                savePendingBookings(newPending);
+
+                // Reset fraud record for this user
+                const fraudData = getFraudData();
+                const identifier = booking.phone || booking.email;
+                if (fraudData[identifier]) {
+                    delete fraudData[identifier];
+                    saveFraudData(fraudData);
+                }
+
+                alert('✅ Booking verified successfully!');
+                loadAllData();
+            }
+        }
+
+        // Reject a booking (false payment claim)
+        function rejectBooking(bookingId) {
+            const reason = prompt('Enter rejection reason (e.g., "Transaction not found", "Invalid amount"):');
+            if (!reason) return;
+
+            const pending = getPendingBookings();
+            const booking = pending.find(b => b.bookingId === bookingId);
+
+            if (booking) {
+                booking.verificationStatus = 'rejected';
+                booking.rejectedAt = new Date().toISOString();
+                booking.rejectionReason = reason;
+
+                // Update pending list
+                savePendingBookings(pending);
+
+                // Record false attempt
+                const fraudData = getFraudData();
+                const identifier = booking.phone || booking.email;
+
+                if (!fraudData[identifier]) {
+                    fraudData[identifier] = {
+                        attempts: [],
+                        falseClaimsCount: 0
+                    };
+                }
+
+                fraudData[identifier].falseClaimsCount++;
+                fraudData[identifier].attempts.push({
+                    timestamp: new Date().toISOString(),
+                    bookingId: booking.bookingId,
+                    transactionId: booking.transactionId,
+                    reason: reason
+                });
+
+                // Block if exceeded limit
+                if (fraudData[identifier].falseClaimsCount >= 2) {
+                    const blockUntil = new Date();
+                    blockUntil.setHours(blockUntil.getHours() + 8);
+                    fraudData[identifier].blockedUntil = blockUntil.toISOString();
+                    alert(`⚠️ User ${identifier} has been BLOCKED for 8 hours due to ${fraudData[identifier].falseClaimsCount} false payment claims.`);
+                }
+
+                saveFraudData(fraudData);
+
+                alert('❌ Booking rejected. User has been flagged.');
+                loadAllData();
+            }
+        }
+
+        // Unblock a user
+        function unblockUser(identifier) {
+            if (!confirm(`Are you sure you want to unblock ${identifier}?`)) return;
+
+            const fraudData = getFraudData();
+            if (fraudData[identifier]) {
+                delete fraudData[identifier].blockedUntil;
+                fraudData[identifier].falseClaimsCount = 0;
+                saveFraudData(fraudData);
+                alert('✅ User unblocked successfully!');
+                loadAllData();
+            }
+        }
+
+        // Update stats
+        function updateStats() {
+            const pending = getPendingBookings();
+            const verified = getVerifiedBookings();
+            const fraudData = getFraudData();
+
+            document.getElementById('pendingCount').textContent = pending.filter(b => b.verificationStatus === 'pending').length;
+            document.getElementById('verifiedCount').textContent = verified.length + pending.filter(b => b.verificationStatus === 'verified').length;
+            document.getElementById('rejectedCount').textContent = pending.filter(b => b.verificationStatus === 'rejected').length;
+            document.getElementById('blockedCount').textContent = Object.values(fraudData).filter(d => d.blockedUntil).length;
+        }
+
+        // Load on page load
+        loadAllData();
+
+        // Reset verified bookings list
+        function resetVerifiedList() {
+            const verified = getVerifiedBookings();
+            if (verified.length === 0) {
+                alert('No verified bookings to reset.');
+                return;
+            }
+
+            if (!confirm(`⚠️ WARNING: This will delete ${verified.length} verified booking(s).\n\nThis action cannot be undone!\n\nAre you sure you want to reset the verified list?`)) {
+                return;
+            }
+
+            // Double confirmation for safety
+            const confirmText = prompt('Type "RESET" to confirm deletion:');
+            if (confirmText !== 'RESET') {
+                alert('Reset cancelled. You must type "RESET" exactly.');
+                return;
+            }
+
+            // Clear verified bookings
+            localStorage.removeItem(VERIFIED_KEY);
+
+            // Also clear verified status from pending list
+            const pending = getPendingBookings();
+            const updatedPending = pending.filter(b => b.verificationStatus !== 'verified');
+            savePendingBookings(updatedPending);
+
+            alert('✅ Verified bookings list has been reset.');
+            loadAllData();
+        }
+
+        // Auto-refresh every 30 seconds
+        setInterval(loadAllData, 30000);
+    </script>
+</body>
+
+</html>
